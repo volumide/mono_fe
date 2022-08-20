@@ -15,3 +15,10 @@ code {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+form input {
+	@apply border-2 rounded p-4 border-gray-200 w-full my-3;
+}
+form span {
+	@apply text-red-500 mb-3 block;
+}

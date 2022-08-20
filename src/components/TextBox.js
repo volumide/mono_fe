@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-const TextBox = ({ name, type, id, key, register, params = {}, ...useFormPorp }) => {
+const TextBox = ({ name, type, id, key, error, register, params = {}, ...useFormPorp }) => {
 	return (
 		<>
 			<input
@@ -9,8 +9,9 @@ const TextBox = ({ name, type, id, key, register, params = {}, ...useFormPorp })
 				id={id}
 				key={key}
 				{...useFormPorp}
-				{...register(name, params)}
+				{...register(name, { ...params })}
 			/>
+			{/* <span>{error[name] && <span>Field is required</span>}</span> */}
 		</>
 	);
 };
@@ -20,6 +21,7 @@ TextBox.propTypes = {
 	name: PropTypes.string.isRequired,
 	type: PropTypes.string.isRequired,
 	key: PropTypes.string,
+	params: PropTypes.object,
 };
 
 export default TextBox;

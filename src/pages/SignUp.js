@@ -1,32 +1,89 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import TextBox from "../components/TextBox";
+import { ReactComponent as Logo } from "../assets/monologo.svg";
 
 const SignUp = () => {
-	const { handleSubmit, watch, register } = useForm({
+	const {
+		handleSubmit,
+		watch,
+		register,
+		formState: { errors },
+	} = useForm({
 		mode: "onChange",
 	});
 
-	const registerA = (data) => console.log("workin");
+	const registerA = (data) => console.log(data);
 
 	return (
-		<div>
-			<form onSubmit={handleSubmit(registerA)}>
-				<div className="grid gap-48 grid-cols-3 grid-rows-1"></div>
-				<TextBox
-					name="first_name"
-					id="firstname"
-					type="text"
-					defaultValue="Olumide"
-					register={register}
-					className="border p-4 border-red-500"
-				/>
-				{watch("first_name")}
-				<button type="submit" className="bg-blue-500 p-5 w-full text-white my-5">
-					Signup
-				</button>
-			</form>
-		</div>
+		<>
+			<div className="h-screen w-screen bg-black flex justify-center items-center">
+				<form className="w-4/5 md:w-2/5 bg-white p-5 rounded-lg" onSubmit={handleSubmit(registerA)}>
+					<div className="md:w-2/4 mx-auto">
+						<div className="text-center my-10">
+							<Logo className="mx-auto my-5" fill="#101010" />
+							<p className="text-gray-400 leading-10">Track all your bank expenses in one place</p>
+						</div>
+						<div className="md:grid gap-10 grid-cols-2 grid-rows-1	">
+							<div>
+								<TextBox
+									error={errors}
+									name="first_name"
+									type="text"
+									register={register}
+									params={{ required: true }}
+									placeholder="First Name"
+								/>
+								{errors.first_name && <span>required</span>}
+							</div>
+
+							<div>
+								<TextBox
+									name="last_name"
+									type="text"
+									register={register}
+									params={{ required: true }}
+									placeholder="Last Name"
+								/>
+								{errors.last_name && <span> required</span>}
+							</div>
+						</div>
+
+						<TextBox
+							name="email"
+							type="text"
+							register={register}
+							params={{ required: true, pattern: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/ }}
+							placeholder="Email"
+						/>
+						{errors.email && errors.email.type === "required" && <span>required</span>}
+						{errors.email && errors.email.type === "pattern" && <span>Invalid email format</span>}
+
+						<TextBox
+							name="password"
+							type="password"
+							register={register}
+							params={{ required: true }}
+							placeholder="Password"
+						/>
+						<p className="py-1"> {watch("password")} </p>
+						{errors.password && <span>required</span>}
+
+						<div className="my-5">
+							<button type="submit" className="bg-blue-700 p-5 w-full text-white my-5 rounded">
+								GET STARTED
+							</button>
+							<p className="text-center text-blue-700 py-5">
+								Already have an account?{" "}
+								<a href="/#" className="underline">
+									Sign in
+								</a>
+							</p>
+						</div>
+					</div>
+				</form>
+			</div>
+		</>
 	);
 };
 
