@@ -1,13 +1,13 @@
 // import logo from "./logo.svg";
 import "./App.css";
-import LinkAccount from "./pages/LinkAccount";
+import Dashboard from "./pages/Dasboard";
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/SignUp";
 
 function App() {
 	return (
 		<div className="App">
-			<LinkAccount />
+			<Dashboard />
 		</div>
 	);
 }

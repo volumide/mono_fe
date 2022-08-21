@@ -2,7 +2,7 @@ import { ReactComponent as Logo } from "../assets/monologo.svg";
 // fill="#101010"
 const Sidebar = ({ ...prp }) => {
 	return (
-		<div className="h-full bg-black text-gray-400 py-16">
+		<div className=" hidden md:block h-full bg-black text-gray-400 py-16">
 			<Logo className="mb-11 ml-24" fill="#fff" />
 			<ul>
 				<a href="/#" className="block py-5 pl-24 text-white mb-1">
