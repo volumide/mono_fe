@@ -4,16 +4,20 @@ class Http {
 	constructor(path) {
 		this.url = "http://localhost:4000/api/" + path;
 	}
+	saveId(mono_id) {
+		localStorage.setItem("mono_id", mono_id);
+	}
+
+	getId() {
+		return localStorage.getItem("mono_id");
+	}
 
 	async post(data, header = {}) {
 		try {
-			const {
-				data: { data: res, account, meta, message },
-				status,
-			} = !Object.keys(header).length
+			const res = !Object.keys(header).length
 				? await axios.post(this.url, data)
 				: await axios.post(this.url, data, header);
-			return { res, status, account, meta, message };
+			return res;
 		} catch (error) {
 			const {
 				response: { data: res },
@@ -24,10 +28,10 @@ class Http {
 
 	async get(header = {}) {
 		try {
-			const { data: res, status } = Object.keys(header).length
+			const res = Object.keys(header).length
 				? await axios.get(this.url, header)
 				: await axios.get(this.url);
-			return { res, status };
+			return res;
 		} catch (error) {
 			const {
 				response: { data: res },
@@ -38,10 +42,10 @@ class Http {
 
 	async put(data, header = {}) {
 		try {
-			const { data: res, status } = !Object.keys(header).length
+			const res = !Object.keys(header).length
 				? await axios.put(this.url, data)
 				: await axios.put(this.url, data, header);
-			return { res, status };
+			return res;
 		} catch (error) {
 			const {
 				response: { data: res },

@@ -12,20 +12,24 @@ import Http from "../http";
 // mono/auth?id=1
 const Dashboard = () => {
 	const [accountLInked, setLinkedAccount] = useState(false);
+	const [name, setName] = useState("false");
 	const [accountBalance, setAccoungBalance] = useState("");
+	const [transaction, setTransactions] = useState("");
 	const monoConnect = useMemo(() => {
 		const monoInstance = new MonoConnect({
 			onClose: () => console.log("Widget closed"),
 			onLoad: () => console.log("Widget loaded successfully"),
 			onSuccess: async ({ code }) => {
-				const res = await new Http("mono/auth?id=2").post({
+				const http = new Http("mono/auth?id=2");
+				const { res: id } = await http.post({
 					"code": code,
 				});
-				setLinkedAccount(true);
-				console.log(res);
-				// if (res.status) console.log(res.message);
-				// else console.log(res.message);
-				console.log(`Linked successfully: ${code}`);
+				console.log(id);
+				if (id) {
+					http.saveId(id);
+					setLinkedAccount(true);
+					await getLinkedAccounts();
+				}
 			},
 			key: process.env.REACT_APP_MONO_SECRET,
 		});
@@ -36,8 +40,10 @@ const Dashboard = () => {
 	}, []);
 
 	const unlinkAccount = async () => {
-		const res = await new Http("mono/unlink/account").post({
-			"id": "63048f8eca8f9f1a9301d082",
+		const http = new Http("mono/unlink/account");
+		const id = http.getId();
+		const res = await http.post({
+			"id": id,
 		});
 		if (res.message) console.log(res.message);
 		else setLinkedAccount(true);
@@ -45,133 +51,156 @@ const Dashboard = () => {
 	};
 
 	const getLinkedAccounts = async () => {
-		const { account, meta, message } = await new Http("mono/linked").post({
-			"id": "63048f8eca8f9f1a9301d082",
+		const http = new Http("mono/linked");
+		const id = http.getId();
+		console.log(id);
+		if (id) {
+			const {
+				data: { data },
+			} = await http.post({
+				"id": id,
+			});
+			console.log(data);
+			if (data.account) {
+				setAccoungBalance(data.account.balance);
+				setName(data.account.name);
+			}
+			// if (message) setLinkedAccount(true);
+			// else {
+			// 	setName(name);
+			// 	setAccoungBalance(balance);
+			// }
+		}
+	};
+
+	const getTransctions = async () => {
+		const http = new Http("mono/transactions");
+		const id = http.getId();
+		const res = await http.post({
+			"id": id,
 		});
-		if (message) {
-			console.log(message);
-			setLinkedAccount(true);
-		} //console.log(message);
-		setAccoungBalance(account.balance);
-		console.log(account, meta);
-		// {"id":"63035d043b8d1c4a496b8500"}
+		const {
+			data: { data },
+			page,
+		} = res;
+		console.log(data);
+		if (data) setTransactions(data);
+		if (res.message) console.log(res.message);
+
+		// else setLinkedAccount(true);
 	};
 
 	useEffect(() => {
 		getLinkedAccounts();
+		getTransctions();
+		// return () => console.clear();
 	}, []);
 
 	return (
-		<div className="h-screen w-screen grid grid-cols-5">
-			<Sidebar />
-			<>
-				{!accountLInked ? (
-					<div className="h-full w-full col-span-5 md:col-span-4 md:grid grid-cols-3 p-10 md:p-16 md:px-24">
-						<div className=" col-span-2  md:pr-36">
-							<div className="flex items-center">
-								<img
-									src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbestprofilepictures.com%2Fwp-content%2Fuploads%2F2021%2F04%2FCool-Profile-Picture-986x1024.jpg&f=1&nofb=1"
-									width="50px"
-									height="50px"
-									alt=""
-									className="rounded-full mr-5"
-								/>
-								<p>Good morning, Ola</p>
-							</div>
-							<div className="my-10 ">
-								<p className="font-bold text-2xl text-center mb-8">Expense Tracker</p>
-								<Stats className="w-full" />
-							</div>
-							<div className="mb-11">
-								<div className="flex py-5 items-center justify-between border-b mb-5">
-									<p>Latest Transaction </p>
-									<Dot className="cursor-pointer w-6 md:w-8" />
-								</div>
-								<ul className="">
-									<List
-										icon={<Car className="mr-5 w-11" />}
-										purpose="Jumia Food"
-										date="11-11-2021 . 10:12am . Credit"
-										amount="-1800"
-									/>
-									<List
-										icon={<Car className="mr-5 w-11" />}
-										purpose="Jumia Food"
-										date="11-11-2021 . 10:12am . Credit"
-										amount="-1800"
-									/>
-								</ul>
-							</div>
+		// <div className="h-screen w-screen grid grid-cols-5">
+		<>
+			{!accountLInked ? (
+				<div className="h-full w-full col-span-5 md:col-span-4 md:grid grid-cols-3 p-10 md:p-16 md:px-24 overflow-y-auto">
+					<div className=" col-span-2  md:pr-36">
+						<div className="flex items-center">
+							<img
+								src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbestprofilepictures.com%2Fwp-content%2Fuploads%2F2021%2F04%2FCool-Profile-Picture-986x1024.jpg&f=1&nofb=1"
+								width="50px"
+								height="50px"
+								alt=""
+								className="rounded-full mr-5"
+							/>
+							<p>Good morning{`, ${name}` || ""}</p>
 						</div>
-						{/* <div></div> */}
-						<div className="md:pl-24">
-							<div className="text-center rounded-lg shadow p-5 mb-10">
-								<p className="font-bold">Total Balance</p>
-								<h2 className="text-3xl font-bold my-3">{accountBalance || "30,000,000"}</h2>
-								<h2>Your balance accross all bank</h2>
-								<div>
-									<Bank className="w-24 mx-auto my-3" />
-								</div>
-								<button
-									onClick={() => unlinkAccount()}
-									className="bg-pink-300 p-5 rounded text-pink-800 font-extrabold my-3 w-full"
-									style={{ background: "#FFF4F4", color: "#F22828" }}
-								>
-									UNLINK BANK ACCOUNT
-								</button>
-							</div>
+						<div className="my-10 ">
+							<p className="font-bold text-2xl text-center mb-8">Expense Tracker</p>
+							<Stats className="w-full" />
+						</div>
+						<div className="mb-11">
 							<div className="flex py-5 items-center justify-between border-b mb-5">
-								<p>Where your money go </p>
+								<p>Latest Transaction </p>
 								<Dot className="cursor-pointer w-6 md:w-8" />
 							</div>
-							<ul>
-								<List purpose="Food and Drinks" amount1="827,400" />
-								<div className="w-full py-1 bg-gray-200 rounded-md relative">
-									<div
-										className="w-2/5 h-full rounded-md absolute left-0 top-0"
-										style={{ background: "#FFB1B1" }}
-									></div>
-								</div>
+							<ul className="">
+								{transaction
+									? transaction.map((v, i) => (
+											<List
+												key={v.date + i.toString()}
+												icon={<Car className="mr-5" style={{ width: "20px" }} />}
+												purpose={v.narration}
+												date={`${v.date} . ${v.type}`}
+												amount={`-${v.amount}`}
+											/>
+									  ))
+									: ""}
+
+								{/* <List
+										icon={<Car className="mr-5 w-11" />}
+										purpose="Jumia Food"
+										date="11-11-2021 . 10:12am . Credit"
+										amount="-1800"
+									/> */}
 							</ul>
 						</div>
 					</div>
-				) : (
-					<div className="h-full col-span-5 md:col-span-4 flex justify-center items-center text-white text-center">
-						<div className="bg-black w-4/6 md:w-3/12  p-10 rounded-lg">
-							<Lock className="mx-auto" />
-							<h3 className="text-2xl leading:10 md:leading-10">Final Step</h3>
-							<p className=" md:leading-10">Link your bank account in seconds</p>
+					{/* <div></div> */}
+					<div className="md:pl-24">
+						<div className="text-center rounded-lg shadow p-5 mb-10">
+							<p className="font-bold">Total Balance</p>
+							<h2 className="text-3xl font-bold my-3">{accountBalance || "30,000,000"}</h2>
+							<h2>Your balance accross all bank</h2>
+							<div>
+								<Bank className="w-24 mx-auto my-3" />
+							</div>
 							<button
-								onClick={() => monoConnect.open()}
-								className="p-4 text-blue-700 bg-white rounded flex mx-auto my-5"
+								onClick={() => unlinkAccount()}
+								className="bg-pink-300 p-5 rounded text-pink-800 font-extrabold my-3 w-full"
+								style={{ background: "#FFF4F4", color: "#F22828" }}
 							>
-								LINK NOW <Arrow className="mx-2" />
+								UNLINK BANK ACCOUNT
 							</button>
 						</div>
+						<div className="flex py-5 items-center justify-between border-b mb-5">
+							<p>Where your money go </p>
+							<Dot className="cursor-pointer w-6 md:w-8" />
+						</div>
+						<ul>
+							<List purpose="Food and Drinks" amount1="827,400" />
+							<div className="w-full py-1 bg-gray-200 rounded-md relative">
+								<div
+									className="w-2/5 h-full rounded-md absolute left-0 top-0"
+									style={{ background: "#FFB1B1" }}
+								></div>
+							</div>
+						</ul>
 					</div>
-				)}
-			</>
-
-			{/* <div className="h-full col-span-5 md:col-span-4 flex justify-center items-center text-white text-center">
-				<div className="bg-black w-4/6 md:w-3/12  p-10 rounded-lg">
-					<Lock className="mx-auto" />
-					<h3 className="text-2xl leading:10 md:leading-10">Final Step</h3>
-					<p className=" md:leading-10">Link your bank account in seconds</p>
-					<button className="p-4 text-blue-700 bg-white rounded flex mx-auto my-5">
-						LINK NOW <Arrow className="mx-2" />
-					</button>
 				</div>
-			</div> */}
-		</div>
+			) : (
+				<div className="h-full col-span-5 md:col-span-4 flex justify-center items-center text-white text-center overflow-y-auto">
+					<div className="bg-black w-4/6 md:w-3/12  p-10 rounded-lg">
+						<Lock className="mx-auto" />
+						<h3 className="text-2xl leading:10 md:leading-10">Final Step</h3>
+						<p className=" md:leading-10">Link your bank account in seconds</p>
+						<button
+							onClick={() => monoConnect.open()}
+							className="p-4 text-blue-700 bg-white rounded flex mx-auto my-5"
+						>
+							LINK NOW <Arrow className="mx-2" />
+						</button>
+					</div>
+				</div>
+			)}
+		</>
 	);
 };
 
 export default Dashboard;
+
 const List = ({ icon, purpose, date, amount, amount1 }) => (
 	<>
 		<li className="flex justify-between items-center w-full  my-2">
 			<div className="flex items-center ">
-				{icon}
+				<div>{icon}</div>
 				<p>
 					<span className="font-bold">{purpose}</span>
 
