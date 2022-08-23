@@ -2,12 +2,16 @@
 import "./App.css";
 import Dashboard from "./pages/Dasboard";
 import SignIn from "./pages/SignIn";
-import Signup from "./pages/SignUp";
+import SignUp from "./pages/SignUp";
+// import Signup from "./pages/SignUp";
 
 function App() {
 	return (
 		<div className="App">
+			{/* <SignIn /> */}
 			<Dashboard />
+			{/* <SignUp /> */}
+			{/* <Dashboard /> */}
 		</div>
 	);
 }

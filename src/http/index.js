@@ -1,16 +1,19 @@
 import axios from "axios";
 
 class Http {
-	constructor(url) {
-		this.url = url;
+	constructor(path) {
+		this.url = "http://localhost:4000/api/" + path;
 	}
 
 	async post(data, header = {}) {
 		try {
-			const { data: res, status } = !Object.keys(header).length
+			const {
+				data: { data: res, account, meta, message },
+				status,
+			} = !Object.keys(header).length
 				? await axios.post(this.url, data)
 				: await axios.post(this.url, data, header);
-			return { res, status };
+			return { res, status, account, meta, message };
 		} catch (error) {
 			const {
 				response: { data: res },

@@ -1,29 +1,66 @@
 import { ReactComponent as Lock } from "../assets/padlock.svg";
 import { ReactComponent as Arrow } from "../assets/arrow-right.svg";
+import MonoConnect from "@mono.co/connect.js";
 import Sidebar from "../components/Sidebar";
-import { useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ReactComponent as Car } from "../assets/car.svg";
 import { ReactComponent as Dot } from "../assets/hambuger.svg";
 import { ReactComponent as Bank } from "../assets/banks.svg";
 import { ReactComponent as Stats } from "../assets/Stats.svg";
+import Http from "../http";
 
+// mono/auth?id=1
 const Dashboard = () => {
 	const [accountLInked, setLinkedAccount] = useState(false);
-	const List = ({ icon, purpose, date, amount, amount1 }) => (
-		<>
-			<li className="flex justify-between items-center w-full  my-2">
-				<div className="flex items-center ">
-					{icon}
-					<p>
-						<span className="font-bold">{purpose}</span>
+	const [accountBalance, setAccoungBalance] = useState("");
+	const monoConnect = useMemo(() => {
+		const monoInstance = new MonoConnect({
+			onClose: () => console.log("Widget closed"),
+			onLoad: () => console.log("Widget loaded successfully"),
+			onSuccess: async ({ code }) => {
+				const res = await new Http("mono/auth?id=2").post({
+					"code": code,
+				});
+				setLinkedAccount(true);
+				console.log(res);
+				// if (res.status) console.log(res.message);
+				// else console.log(res.message);
+				console.log(`Linked successfully: ${code}`);
+			},
+			key: process.env.REACT_APP_MONO_SECRET,
+		});
 
-						<span className="block font-light text-gray-400  text-sm"> {date} </span>
-					</p>
-				</div>
-				{amount ? <p className="font-bold">{amount}</p> : <p className="font-light">{amount1}</p>}
-			</li>
-		</>
-	);
+		monoInstance.setup();
+
+		return monoInstance;
+	}, []);
+
+	const unlinkAccount = async () => {
+		const res = await new Http("mono/unlink/account").post({
+			"id": "63048f8eca8f9f1a9301d082",
+		});
+		if (res.message) console.log(res.message);
+		else setLinkedAccount(true);
+		// console.log(res);
+	};
+
+	const getLinkedAccounts = async () => {
+		const { account, meta, message } = await new Http("mono/linked").post({
+			"id": "63048f8eca8f9f1a9301d082",
+		});
+		if (message) {
+			console.log(message);
+			setLinkedAccount(true);
+		} //console.log(message);
+		setAccoungBalance(account.balance);
+		console.log(account, meta);
+		// {"id":"63035d043b8d1c4a496b8500"}
+	};
+
+	useEffect(() => {
+		getLinkedAccounts();
+	}, []);
+
 	return (
 		<div className="h-screen w-screen grid grid-cols-5">
 			<Sidebar />
@@ -70,12 +107,13 @@ const Dashboard = () => {
 						<div className="md:pl-24">
 							<div className="text-center rounded-lg shadow p-5 mb-10">
 								<p className="font-bold">Total Balance</p>
-								<h2 className="text-3xl font-bold my-3">30,000,000</h2>
+								<h2 className="text-3xl font-bold my-3">{accountBalance || "30,000,000"}</h2>
 								<h2>Your balance accross all bank</h2>
 								<div>
 									<Bank className="w-24 mx-auto my-3" />
 								</div>
 								<button
+									onClick={() => unlinkAccount()}
 									className="bg-pink-300 p-5 rounded text-pink-800 font-extrabold my-3 w-full"
 									style={{ background: "#FFF4F4", color: "#F22828" }}
 								>
@@ -103,7 +141,10 @@ const Dashboard = () => {
 							<Lock className="mx-auto" />
 							<h3 className="text-2xl leading:10 md:leading-10">Final Step</h3>
 							<p className=" md:leading-10">Link your bank account in seconds</p>
-							<button className="p-4 text-blue-700 bg-white rounded flex mx-auto my-5">
+							<button
+								onClick={() => monoConnect.open()}
+								className="p-4 text-blue-700 bg-white rounded flex mx-auto my-5"
+							>
 								LINK NOW <Arrow className="mx-2" />
 							</button>
 						</div>
@@ -126,3 +167,18 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+const List = ({ icon, purpose, date, amount, amount1 }) => (
+	<>
+		<li className="flex justify-between items-center w-full  my-2">
+			<div className="flex items-center ">
+				{icon}
+				<p>
+					<span className="font-bold">{purpose}</span>
+
+					<span className="block font-light text-gray-400  text-sm"> {date} </span>
+				</p>
+			</div>
+			{amount ? <p className="font-bold">{amount}</p> : <p className="font-light">{amount1}</p>}
+		</li>
+	</>
+);

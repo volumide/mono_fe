@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import TextBox from "../components/TextBox";
 import { ReactComponent as Logo } from "../assets/monologo.svg";
+import Http from "../http";
 
 const SignUp = () => {
 	const {
@@ -13,12 +14,19 @@ const SignUp = () => {
 		mode: "onChange",
 	});
 
-	const registerA = (data) => console.log(data);
+	const userSignup = async (data) => {
+		const res = await new Http("signup").post(data);
+		if (res.status) console.log(res.message);
+		else console.log(res.message);
+	};
 
 	return (
 		<>
 			<div className="h-screen w-screen bg-black flex justify-center items-center">
-				<form className="w-4/5 md:w-2/5 bg-white p-5 rounded-lg" onSubmit={handleSubmit(registerA)}>
+				<form
+					className="w-4/5 md:w-2/5 bg-white p-5 rounded-lg"
+					onSubmit={handleSubmit(userSignup)}
+				>
 					<div className="md:w-2/4 mx-auto">
 						<div className="text-center my-10">
 							<Logo className="mx-auto my-5" fill="#101010" />
