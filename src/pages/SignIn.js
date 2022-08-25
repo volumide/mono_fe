@@ -2,8 +2,12 @@ import { useForm } from "react-hook-form";
 import TextBox from "../components/TextBox";
 import { ReactComponent as Logo } from "../assets/monologo.svg";
 import Http from "../http";
+import { Link, useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 
 const SignIn = () => {
+	const naviagate = useNavigate();
+	const id = useRef();
 	const {
 		handleSubmit,
 		register,
@@ -11,11 +15,22 @@ const SignIn = () => {
 	} = useForm({
 		mode: "onChange",
 	});
+	const [message, setMessage] = useState("");
 	const login = async (data) => {
-		const { res, status } = await new Http("login").post(data);
-		// console.log(res)
-		if (status) console.log(res);
-		else console.log(res.message);
+		const res = await new Http("login").post(data);
+		const {
+			data: { data: responds },
+			message,
+		} = res;
+		if (responds) {
+			localStorage.setItem(
+				"isLoggedIn",
+				`jd${Math.random()}_${responds.data.id}${Math.random()}ZAnia`
+			);
+			localStorage.setItem("profile", JSON.stringify(responds));
+			naviagate("/dashboard/view", { replace: true });
+		}
+		if (message) setMessage(message);
 	};
 
 	return (
@@ -67,9 +82,9 @@ const SignIn = () => {
 						</button>
 						<p className="text-center text-blue-700 py-5">
 							Don't have an account?{" "}
-							<a href="/#" className="underline">
-								Sign up
-							</a>
+							<Link to="/signup" className="underline">
+								Signup
+							</Link>
 						</p>
 					</div>
 				</div>

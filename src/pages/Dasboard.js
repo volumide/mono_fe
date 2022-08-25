@@ -9,12 +9,21 @@ import { ReactComponent as Bank } from "../assets/banks.svg";
 import { ReactComponent as Stats } from "../assets/Stats.svg";
 import Http from "../http";
 
+const splitDate = (date) => {
+	const toArr = date.split("T");
+	const firstDate = toArr[0];
+	const time = toArr[1].split(".")[0];
+	return { firstDate, time };
+};
 // mono/auth?id=1
 const Dashboard = () => {
 	const [accountLInked, setLinkedAccount] = useState(false);
 	const [name, setName] = useState("false");
 	const [accountBalance, setAccoungBalance] = useState("");
 	const [transaction, setTransactions] = useState("");
+	const [nextPage, setNextPage] = useState("");
+	const [previousPage, setPreviousPage] = useState("");
+	const [paging, setPaging] = useState({});
 	const monoConnect = useMemo(() => {
 		const monoInstance = new MonoConnect({
 			onClose: () => console.log("Widget closed"),
@@ -73,18 +82,26 @@ const Dashboard = () => {
 		}
 	};
 
-	const getTransctions = async () => {
-		const http = new Http("mono/transactions");
+	const getTransctions = async (page = "") => {
+		let http;
+		if (page !== "") http = new Http("mono/transactions?id" + page);
+		else http = new Http("mono/transactions");
+
 		const id = http.getId();
 		const res = await http.post({
 			"id": id,
 		});
 		const {
-			data: { data },
-			page,
+			data: { data, paging },
 		} = res;
-		console.log(data);
-		if (data) setTransactions(data);
+		// console.log(data);
+		console.log(paging);
+		if (paging.next) setNextPage(paging.next.split("?page")[1]);
+		if (paging.previous) setPreviousPage(paging.previous.split("?page")[1]);
+		if (data) {
+			setTransactions(data);
+			setPaging(paging);
+		}
 		if (res.message) console.log(res.message);
 
 		// else setLinkedAccount(true);
@@ -121,19 +138,38 @@ const Dashboard = () => {
 								<p>Latest Transaction </p>
 								<Dot className="cursor-pointer w-6 md:w-8" />
 							</div>
-							<ul className="">
+							<ul className="overflow-y-auto" style={{ maxHeight: "550px" }}>
 								{transaction
 									? transaction.map((v, i) => (
 											<List
 												key={v.date + i.toString()}
 												icon={<Car className="mr-5" style={{ width: "20px" }} />}
 												purpose={v.narration}
-												date={`${v.date} . ${v.type}`}
+												date={`${splitDate(v.date).firstDate} . ${splitDate(v.date).time} . ${
+													v.type
+												}`}
 												amount={`-${v.amount}`}
 											/>
 									  ))
 									: ""}
-
+								<div className="text-center py-3">
+									{paging.previous && (
+										<button
+											className="p-3 border border-gray-200 mr-4"
+											onClick={() => getTransctions(previousPage)}
+										>
+											Previous
+										</button>
+									)}
+									{paging.next && (
+										<button
+											className="p-3 border border-gray-200"
+											onClick={() => getTransctions(nextPage)}
+										>
+											Next
+										</button>
+									)}
+								</div>
 								{/* <List
 										icon={<Car className="mr-5 w-11" />}
 										purpose="Jumia Food"
@@ -147,7 +183,9 @@ const Dashboard = () => {
 					<div className="md:pl-24">
 						<div className="text-center rounded-lg shadow p-5 mb-10">
 							<p className="font-bold">Total Balance</p>
-							<h2 className="text-3xl font-bold my-3">{accountBalance || "30,000,000"}</h2>
+							<h2 className="text-3xl font-bold my-3">
+								{accountBalance.toLocaleString("en-US") || 0}
+							</h2>
 							<h2>Your balance accross all bank</h2>
 							<div>
 								<Bank className="w-24 mx-auto my-3" />
@@ -198,13 +236,13 @@ export default Dashboard;
 
 const List = ({ icon, purpose, date, amount, amount1 }) => (
 	<>
-		<li className="flex justify-between items-center w-full  my-2">
+		<li className="flex justify-between items-center w-full  my-5">
 			<div className="flex items-center ">
 				<div>{icon}</div>
 				<p>
 					<span className="font-bold">{purpose}</span>
 
-					<span className="block font-light text-gray-400  text-sm"> {date} </span>
+					<span className="block font-light text-gray-400  text-sm py-2"> {date} </span>
 				</p>
 			</div>
 			{amount ? <p className="font-bold">{amount}</p> : <p className="font-light">{amount1}</p>}

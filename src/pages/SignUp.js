@@ -1,8 +1,8 @@
-import React from "react";
 import { useForm } from "react-hook-form";
 import TextBox from "../components/TextBox";
 import { ReactComponent as Logo } from "../assets/monologo.svg";
 import Http from "../http";
+import { Link } from "react-router-dom";
 
 const SignUp = () => {
 	const {
@@ -83,9 +83,9 @@ const SignUp = () => {
 							</button>
 							<p className="text-center text-blue-700 py-5">
 								Already have an account?{" "}
-								<a href="/#" className="underline">
+								<Link to="/signin" className="underline">
 									Sign in
-								</a>
+								</Link>
 							</p>
 						</div>
 					</div>

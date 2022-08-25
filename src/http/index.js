@@ -2,7 +2,10 @@ import axios from "axios";
 
 class Http {
 	constructor(path) {
-		this.url = "http://localhost:4000/api/" + path;
+		this.url =
+			process.env.NODE_ENV === "development"
+				? "http://localhost:4000/api/" + path
+				: "https://mono-access.herokuapp.com/api/" + path;
 	}
 	saveId(mono_id) {
 		localStorage.setItem("mono_id", mono_id);
