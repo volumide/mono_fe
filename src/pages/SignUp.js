@@ -3,6 +3,7 @@ import TextBox from "../components/TextBox";
 import { ReactComponent as Logo } from "../assets/monologo.svg";
 import Http from "../http";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
 	const {
@@ -16,8 +17,8 @@ const SignUp = () => {
 
 	const userSignup = async (data) => {
 		const res = await new Http("signup").post(data);
-		if (res.status) console.log(res.message);
-		else console.log(res.message);
+		if (res.status === 200) toast.info(res.message);
+		else toast(res.message);
 	};
 
 	return (

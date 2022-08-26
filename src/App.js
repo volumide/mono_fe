@@ -1,5 +1,6 @@
 // import logo from "./logo.svg";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import "./App.css";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dasboard";
@@ -22,6 +23,7 @@ function App() {
 					</Route>
 				</Routes>
 			</div>
+			<ToastContainer position="top-right" autoClose={5000} hideProgressBar />
 		</BrowserRouter>
 	);
 }

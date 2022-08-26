@@ -8,6 +8,7 @@ import { ReactComponent as Dot } from "../assets/hambuger.svg";
 import { ReactComponent as Bank } from "../assets/banks.svg";
 import { ReactComponent as Stats } from "../assets/Stats.svg";
 import Http from "../http";
+import { toast } from "react-toastify";
 
 const splitDate = (date) => {
 	const toArr = date.split("T");
@@ -33,7 +34,6 @@ const Dashboard = () => {
 				const { res: id } = await http.post({
 					"code": code,
 				});
-				console.log(id);
 				if (id) {
 					http.saveId(id);
 					setLinkedAccount(true);
@@ -54,7 +54,7 @@ const Dashboard = () => {
 		const res = await http.post({
 			"id": id,
 		});
-		if (res.message) console.log(res.message);
+		if (res.message) toast.info(res.message);
 		else setLinkedAccount(true);
 		// console.log(res);
 	};
@@ -62,7 +62,6 @@ const Dashboard = () => {
 	const getLinkedAccounts = async () => {
 		const http = new Http("mono/linked");
 		const id = http.getId();
-		console.log(id);
 		if (id) {
 			const {
 				data: { data },
@@ -74,11 +73,6 @@ const Dashboard = () => {
 				setAccoungBalance(data.account.balance);
 				setName(data.account.name);
 			}
-			// if (message) setLinkedAccount(true);
-			// else {
-			// 	setName(name);
-			// 	setAccoungBalance(balance);
-			// }
 		}
 	};
 
@@ -94,8 +88,6 @@ const Dashboard = () => {
 		const {
 			data: { data, paging },
 		} = res;
-		// console.log(data);
-		console.log(paging);
 		if (paging.next) setNextPage(paging.next.split("?page")[1]);
 		if (paging.previous) setPreviousPage(paging.previous.split("?page")[1]);
 		if (data) {
@@ -103,18 +95,14 @@ const Dashboard = () => {
 			setPaging(paging);
 		}
 		if (res.message) console.log(res.message);
-
-		// else setLinkedAccount(true);
 	};
 
 	useEffect(() => {
 		getLinkedAccounts();
 		getTransctions();
-		// return () => console.clear();
 	}, []);
 
 	return (
-		// <div className="h-screen w-screen grid grid-cols-5">
 		<>
 			{!accountLInked ? (
 				<div className="h-full w-full col-span-5 md:col-span-4 md:grid grid-cols-3 p-10 md:p-16 md:px-24 overflow-y-auto">

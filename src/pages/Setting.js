@@ -5,6 +5,7 @@ import { ReactComponent as Logo } from "../assets/monologo.svg";
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import { data } from "autoprefixer";
+import { toast } from "react-toastify";
 
 const Setting = () => {
 	const navigate = useNavigate();
@@ -21,9 +22,8 @@ const Setting = () => {
 	const updateProfile = async (data) => {
 		const http = new Http("update-profile");
 		const res = await http.put(data);
-		if (res.data.message.message === "user updated created") {
-			console.log("profile updaed successfuly");
-		}
+		if (res.data.message.message === "user updated created") toast.info("Update successful");
+		else toast.warning("Error updating profile");
 	};
 
 	const updateAccount = async (data) => {
@@ -39,8 +39,7 @@ const Setting = () => {
 	const deleteAccount = async () => {
 		const http = new Http(`delete-user?id=${profile.id}`);
 		const res = await http.delete();
-		console.log(res);
-		console.log(res);
+		navigate("/siginin");
 	};
 
 	const logout = () => {

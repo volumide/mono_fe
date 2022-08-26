@@ -3,11 +3,11 @@ import TextBox from "../components/TextBox";
 import { ReactComponent as Logo } from "../assets/monologo.svg";
 import Http from "../http";
 import { Link, useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 const SignIn = () => {
 	const naviagate = useNavigate();
-	const id = useRef();
 	const {
 		handleSubmit,
 		register,
@@ -15,7 +15,7 @@ const SignIn = () => {
 	} = useForm({
 		mode: "onChange",
 	});
-	const [message, setMessage] = useState("");
+	// const [message, setMessage] = useState("");
 	const login = async (data) => {
 		const res = await new Http("login").post(data);
 		const {
@@ -23,6 +23,7 @@ const SignIn = () => {
 			message,
 		} = res;
 		if (responds) {
+			toast.info("signin successful");
 			localStorage.setItem(
 				"isLoggedIn",
 				`jd${Math.random()}_${responds.data.id}${Math.random()}ZAnia`
@@ -30,7 +31,7 @@ const SignIn = () => {
 			localStorage.setItem("profile", JSON.stringify(responds));
 			naviagate("/dashboard/view", { replace: true });
 		}
-		if (message) setMessage(message);
+		if (message) toast.warning(message);
 	};
 
 	return (
