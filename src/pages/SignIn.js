@@ -3,7 +3,6 @@ import TextBox from "../components/TextBox";
 import { ReactComponent as Logo } from "../assets/monologo.svg";
 import Http from "../http";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { toast } from "react-toastify";
 
 const SignIn = () => {
@@ -15,7 +14,6 @@ const SignIn = () => {
 	} = useForm({
 		mode: "onChange",
 	});
-	// const [message, setMessage] = useState("");
 	const login = async (data) => {
 		const res = await new Http("login").post(data);
 		const {
